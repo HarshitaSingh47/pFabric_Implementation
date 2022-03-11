@@ -3,7 +3,7 @@ import threading
 import time
 import logging
 import random
-
+import csv
 try:
     import queue
 except ImportError:
@@ -63,7 +63,7 @@ class ProducerThread(threading.Thread):
                         q.put(top_ele)
                         q.put(next_ele)
                         q.put(item)
-                        logging.debug('Dropped lower priority packet in favor of queued packet '
+                        logging.debug('Dropped lower priority packet in favor of queued packet. Packet Dropped : '
                                       + str(dropped_ele) + " " + '...\n\n')
                     else:
                         logging.debug(
@@ -139,7 +139,9 @@ def generate_priority(flow) -> list:
         item.append(ele[0])
         priority_list.append(item)
 
-
+    # print(priority_list)
+    for idx in priority_list:
+        print("\nPriority of element ", idx[1] , " is ", idx[0], "\n")
     return priority_list
 
 
@@ -156,9 +158,25 @@ def generate_packet_list(priority_list):
             item.append(ele[1])
             output_str.append(item)
             p = p - 1
-    print(output_str)
+    # print(output_str)
     return output_str
 
+
+def read_csvfile(choice):
+    file = 'flow_input_simple.csv'
+    print(choice)
+    choice = int(choice)
+    if choice == 2:
+        file = 'flow_input.csv'
+    elif choice == 1:
+        file = 'flow_input_simple.csv'
+    with open(file , 'r', encoding='utf-8-sig') as file:
+        reader = csv.reader(file)
+        flow = []
+        for row in reader:
+            flow.append(row)
+            print(row)
+    return flow
 
 
 if __name__ == '__main__':
@@ -166,7 +184,9 @@ if __name__ == '__main__':
     c = ConsumerThread(name='dequeue')
     i = 0
     flow = []
-    flow = get_input()
+
+    choice = input('Enter \n1. for simple flow \n2. for complex flow: \n\t')
+    flow = read_csvfile(choice)
     #Get input from user
     #generate priority based on flow size
     priority_list = generate_priority(flow)
@@ -178,3 +198,6 @@ if __name__ == '__main__':
     time.sleep(2)
     c.start()
     time.sleep(2)
+    # ConsumerThread.join(self=)
+    # ProducerThread.join()
+    # print("Finished all processes\n")
